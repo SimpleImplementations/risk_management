@@ -1,1 +1,1 @@
-# risk_managment
+# risk_management
