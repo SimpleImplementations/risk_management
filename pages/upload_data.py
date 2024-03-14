@@ -1,8 +1,10 @@
 import base64
 import io
+import os
 import dash
 import pandas as pd
 from dash import dcc, html, callback, Input, Output, State
+from dash.exceptions import PreventUpdate
 from backend.app_data import AppData
 from backend.globals import UPLOADED_XLSX_PATH
 
@@ -23,30 +25,36 @@ layout = html.Div(
                 "textAlign": "center",
             },
         ),
-        html.Div(id="output-data"),
+        html.Div(id="data-loaded"),
+        html.Button("Update Data", id="update-button"),
+        html.Div(id="table-content"),
     ]
 )
 
 
-def parse_contents(contents, filename):
+def update_app_data(contents, filename):
     _content_type, content_string = contents.split(",")
     decoded = base64.b64decode(content_string)
     df = pd.read_excel(io.BytesIO(decoded))
     df.to_excel(UPLOADED_XLSX_PATH, index=False)
     AppData().filename = filename
+    return html.Div("Data Loaded Correctly")
+
+
+@callback(Output("data-loaded", "children"), [Input("input-data", "contents")], [State("input-data", "filename")])
+def update_data(contents, filename):
+    if contents is not None:
+        return update_app_data(contents, filename)
+
+
+@callback(Output("table-content", "children"), [Input("update-button", "n_clicks")])
+def update_table(n_clicks):
+    # if n_clicks is None:
+    #     raise PreventUpdate
     return html.Div(
         [
-            html.H4(filename),
-            # html.H6("Raw Content:"),
-            # html.Pre(contents[0:200] + "...", style={"whiteSpace": "pre-wrap", "wordBreak": "break-all"}),
+            html.H4(AppData().filename),
             html.Hr(),
-            html.Div([html.H6("Parsed Content:"), dcc.Markdown(df.to_markdown())]),
+            html.Div([html.H6("Parsed Content:"), dcc.Markdown(AppData().returns_df.to_markdown())]),
         ]
     )
-
-
-@callback(Output("output-data", "children"), [Input("input-data", "contents")], [State("input-data", "filename")])
-def update_output(contents, filename):
-    if contents is not None:
-        children = [parse_contents(contents, filename)]
-        return children

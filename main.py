@@ -1,7 +1,7 @@
 import dash
 import os
 import pandas as pd
-from dash import Dash, html, dcc, page_registry, page_container
+from dash import Dash, html, dcc, page_registry, page_container, Output, Input
 from backend.app_data import AppData
 from backend.globals import remove_old_files
 
