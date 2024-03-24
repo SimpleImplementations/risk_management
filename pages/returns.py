@@ -11,7 +11,7 @@ layout = html.Div(
         html.H3(AppData().filename),
         html.Div(id="returns-graph"),
         html.Hr(),
-        html.Div(id="plot-graph"),
+        # html.Div(id="plot-graph"),
         html.Button("Update Data", id="update-button", style={"display": "none"}),
     ],
 )
@@ -19,4 +19,4 @@ layout = html.Div(
 
 @callback(Output("returns-graph", "children"), [Input("update-button", "n_clicks")])
 def update_table(n_clicks):
-    return dcc.Graph(figure=AppData().return_fig)
+    return dcc.Graph(figure=AppData().plot_creator.return_fig)
